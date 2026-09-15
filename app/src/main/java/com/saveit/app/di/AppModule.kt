@@ -31,6 +31,13 @@ object AppModule {
         }
         return OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor { chain ->
+                // Reddit blocks requests without a proper User-Agent (returns 403)
+                val request = chain.request().newBuilder()
+                    .header("User-Agent", "android:com.saveit.app:v1.0 (by /u/saveit_app)")
+                    .build()
+                chain.proceed(request)
+            }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(120, TimeUnit.SECONDS)
             .writeTimeout(120, TimeUnit.SECONDS)
