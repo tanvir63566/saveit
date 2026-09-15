@@ -1,0 +1,6 @@
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class com.saveit.app.data.remote.dto.** { *; }
+-keep class com.saveit.app.data.model.** { *; }
+-dontwarn okhttp3.**
+-dontwarn retrofit2.**
