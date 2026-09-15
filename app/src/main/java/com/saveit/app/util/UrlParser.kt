@@ -30,7 +30,8 @@ object UrlParser {
         return when (platform) {
             Platform.YOUTUBE -> {
                 val videoId = extractYouTubeId(url)
-                "YouTube Video${if (videoId != null) \" ($videoId)\" else \"\"}"
+                val suffix = if (videoId != null) " ($videoId)" else ""
+                "YouTube Video$suffix"
             }
             Platform.INSTAGRAM -> {
                 when {
