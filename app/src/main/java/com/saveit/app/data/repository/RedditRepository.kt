@@ -7,17 +7,29 @@ import com.saveit.app.data.model.MediaItem
 import com.saveit.app.data.model.MediaType
 import com.saveit.app.data.model.Platform
 import com.saveit.app.data.remote.RedditApi
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Singleton
 class RedditRepository @Inject constructor(
-    private val redditApi: RedditApi
+    private val redditApi: RedditApi,
+    private val okHttpClient: OkHttpClient
 ) {
     suspend fun getMediaInfo(url: String): Result<MediaInfo> {
-        return try {
-            val jsonUrl = buildJsonUrl(url)
-            val response = redditApi.getPostJson(jsonUrl)
+        return withContext(Dispatchers.IO) {
+            try {
+                // Resolve shortened Reddit links (e.g., reddit.com/r/.../s/...)
+                val request = Request.Builder().url(url).head().build()
+                val redirectResponse = okHttpClient.newCall(request).execute()
+                val finalUrl = redirectResponse.request.url.toString()
+                redirectResponse.close()
+
+                val jsonUrl = buildJsonUrl(finalUrl)
+                val response = redditApi.getPostJson(jsonUrl)
 
             if (!response.isSuccessful || response.body() == null) {
                 return Result.failure(Exception("Failed to fetch Reddit post: ${response.code()}"))
@@ -32,6 +44,7 @@ class RedditRepository @Inject constructor(
             parsePostData(postData, url)
         } catch (e: Exception) {
             Result.failure(e)
+        }
         }
     }
 
