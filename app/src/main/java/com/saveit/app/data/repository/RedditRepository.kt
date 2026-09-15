@@ -32,7 +32,7 @@ class RedditRepository @Inject constructor(
                 val response = redditApi.getPostJson(jsonUrl)
 
             if (!response.isSuccessful || response.body() == null) {
-                return Result.failure(Exception("Failed to fetch Reddit post: ${response.code()}"))
+                return@withContext Result.failure(Exception("Failed to fetch Reddit post: ${response.code()}"))
             }
 
             val jsonArray = response.body()!!
